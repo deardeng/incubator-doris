@@ -375,7 +375,7 @@ Status TxnManager::commit_txn(OlapMeta* meta, TPartitionId partition_id,
     // it is under a single txn lock
     if (!is_recovery) {
         Status save_status = RowsetMetaManager::save(meta, tablet_uid, rowset_ptr->rowset_id(),
-                                                     rowset_ptr->rowset_meta()->get_rowset_pb());
+                                                     rowset_ptr->rowset_meta()->get_rowset_pb(), false);
         DBUG_EXECUTE_IF("TxnManager.RowsetMetaManager.save_wait", {
             if (auto wait = dp->param<int>("duration", 0); wait > 0) {
                 LOG_WARNING("TxnManager.RowsetMetaManager.save_wait").tag("wait ms", wait);

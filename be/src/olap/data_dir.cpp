@@ -530,7 +530,7 @@ Status DataDir::load() {
                 rowset_meta->set_tablet_schema(tablet->tablet_schema());
                 RETURN_IF_ERROR(RowsetMetaManager::save(_meta, rowset_meta->tablet_uid(),
                                                         rowset_meta->rowset_id(),
-                                                        rowset_meta->get_rowset_pb()));
+                                                        rowset_meta->get_rowset_pb(), false));
             }
             Status commit_txn_status = _txn_manager->commit_txn(
                     _meta, rowset_meta->partition_id(), rowset_meta->txn_id(),
@@ -563,7 +563,7 @@ Status DataDir::load() {
                 rowset_meta->set_tablet_schema(tablet->tablet_schema());
                 RETURN_IF_ERROR(RowsetMetaManager::save(_meta, rowset_meta->tablet_uid(),
                                                         rowset_meta->rowset_id(),
-                                                        rowset_meta->get_rowset_pb()));
+                                                        rowset_meta->get_rowset_pb(), false));
             }
             Status publish_status = tablet->add_rowset(rowset);
             if (!publish_status && !publish_status.is<PUSH_VERSION_ALREADY_EXIST>()) {

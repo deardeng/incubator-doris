@@ -462,6 +462,16 @@ Status TabletMeta::_save_meta(DataDir* data_dir) {
 Status TabletMeta::serialize(string* meta_binary) {
     TabletMetaPB tablet_meta_pb;
     to_meta_pb(&tablet_meta_pb);
+    if (tablet_meta_pb.partition_id() <= 0) {
+        LOG(WARNING) << "invalid partition id " << tablet_meta_pb.partition_id() << " tablet "
+                     << tablet_meta_pb.tablet_id();
+    }
+    DBUG_EXECUTE_IF("TabletMeta::serialize::zero_partition_id", {
+        long partition_id = tablet_meta_pb.partition_id();
+        tablet_meta_pb.set_partition_id(0);
+        LOG(WARNING) << "set debug point TabletMeta::serialize::zero_partition_id old=" << partition_id
+                     << " new=" << tablet_meta_pb.DebugString();
+    });
     bool serialize_success = tablet_meta_pb.SerializeToString(meta_binary);
     if (!serialize_success) {
         LOG(FATAL) << "failed to serialize meta " << tablet_id();
