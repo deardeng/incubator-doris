@@ -430,7 +430,7 @@ public class CacheHotspotManager extends MasterDaemon {
         for (Backend backend : backends) {
             Set<Long> beTabletIds = ((CloudEnv) Env.getCurrentEnv())
                                     .getCloudTabletRebalancer()
-                                    .getSnapshotTabletsByBeId(backend.getId());
+                                    .getSnapshotTabletsInPrimaryByBeId(backend.getId());
             List<Tablet> warmUpTablets = new ArrayList<>();
             for (Tablet tablet : tablets) {
                 if (beTabletIds.contains(tablet.getId())) {
@@ -560,7 +560,7 @@ public class CacheHotspotManager extends MasterDaemon {
             for (Backend backend : backends) {
                 Set<Long> beTabletIds = ((CloudEnv) Env.getCurrentEnv())
                                         .getCloudTabletRebalancer()
-                                        .getSnapshotTabletsByBeId(backend.getId());
+                                        .getSnapshotTabletsInPrimaryByBeId(backend.getId());
                 List<Tablet> warmUpTablets = new ArrayList<>();
                 for (Tablet tablet : tablets) {
                     if (beTabletIds.contains(tablet.getId())) {
