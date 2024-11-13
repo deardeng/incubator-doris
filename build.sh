@@ -313,7 +313,7 @@ if [[ "${CLEAN}" -eq 1 && "${BUILD_BE}" -eq 0 && "${BUILD_FE}" -eq 0 && "${BUILD
 fi
 
 if [[ -z "${WITH_MYSQL}" ]]; then
-    WITH_MYSQL='OFF'
+    WITH_MYSQL='ON'
 fi
 if [[ -z "${GLIBC_COMPATIBILITY}" ]]; then
     if [[ "$(uname -s)" != 'Darwin' ]]; then
