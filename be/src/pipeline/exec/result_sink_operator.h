@@ -21,6 +21,7 @@
 
 #include "operator.h"
 #include "pipeline/pipeline_x/operator.h"
+#include "util/arrow/row_batch.h"
 #include "vec/sink/vresult_sink.h"
 
 namespace doris {
@@ -61,6 +62,7 @@ private:
     friend class ResultSinkOperatorX;
 
     vectorized::VExprContextSPtrs _output_vexpr_ctxs;
+    std::shared_ptr<arrow::Schema> _arrow_schema;
 
     std::shared_ptr<BufferControlBlock> _sender = nullptr;
     std::shared_ptr<ResultWriter> _writer = nullptr;
