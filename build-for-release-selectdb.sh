@@ -125,7 +125,7 @@ FE="fe"
 BE="be"
 BROKER="apache_hdfs_broker"
 
-PACKAGE_NAME="velodb-doris-${VERSION}-bin-${ARCH}"
+PACKAGE_NAME="apache-doris-${VERSION}-bin-${ARCH}"
 if [[ "${_USE_AVX2}" == "0" && "${ARCH}" == "x64" ]]; then
     PACKAGE_NAME="${PACKAGE_NAME}-noavx2"
 fi
