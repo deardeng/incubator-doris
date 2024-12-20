@@ -286,6 +286,8 @@ public:
     // Must make sure the row column is always the last column
     void add_row_column();
     void copy_from(const TabletSchema& tablet_schema);
+    // lightweight copy, take care of lifecycle of TabletColumn
+    void shawdow_copy_without_columns(const TabletSchema& tablet_schema);
     void update_index_info_from(const TabletSchema& tablet_schema);
     std::string to_key() const;
     // Don't use.
@@ -465,6 +467,7 @@ public:
 private:
     friend bool operator==(const TabletSchema& a, const TabletSchema& b);
     friend bool operator!=(const TabletSchema& a, const TabletSchema& b);
+    TabletSchema(const TabletSchema&) = default;
 
     KeysType _keys_type = DUP_KEYS;
     SortType _sort_type = SortType::LEXICAL;
