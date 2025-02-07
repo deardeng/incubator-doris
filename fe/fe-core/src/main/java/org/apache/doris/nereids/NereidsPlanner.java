@@ -20,7 +20,6 @@ package org.apache.doris.nereids;
 import org.apache.doris.analysis.DescriptorTable;
 import org.apache.doris.analysis.ExplainOptions;
 import org.apache.doris.analysis.StatementBase;
-import org.apache.doris.catalog.Column;
 import org.apache.doris.catalog.TableIf;
 import org.apache.doris.common.FormatOptions;
 import org.apache.doris.common.NereidsException;
@@ -419,11 +418,9 @@ public class NereidsPlanner extends Planner {
         ArrayList<String> columnLabels = Lists.newArrayListWithExpectedSize(physicalPlan.getOutput().size());
         List<FieldInfo> fieldInfos = Lists.newArrayListWithExpectedSize(physicalPlan.getOutput().size());
         for (NamedExpression output : physicalPlan.getOutput()) {
-            Optional<Column> column = Optional.empty();
             Optional<TableIf> table = Optional.empty();
             if (output instanceof SlotReference) {
                 SlotReference slotReference = (SlotReference) output;
-                column = slotReference.getColumn();
                 table = slotReference.getTable();
             }
             columnLabels.add(output.getName());
@@ -434,7 +431,7 @@ public class NereidsPlanner extends Planner {
                             : (table.isPresent() ? table.get().getName() : ""),
                     table.isPresent() ? table.get().getName() : "",
                     output.getName(),
-                    column.isPresent() ? column.get().getName() : ""
+                    output.getName()
             );
             fieldInfos.add(fieldInfo);
         }

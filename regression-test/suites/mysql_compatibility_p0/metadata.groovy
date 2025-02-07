@@ -42,7 +42,7 @@ suite ("metadata") {
     println meta
 
     assertEquals("c1", meta.getColumnName(1))
-    assertEquals("k2", meta.getColumnName(2))
+    assertEquals("c2", meta.getColumnName(2))
     assertEquals("c3", meta.getColumnName(3))
 
     assertEquals("c1", meta.getColumnLabel(1))
