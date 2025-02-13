@@ -204,6 +204,9 @@ public class CollectRelation implements AnalysisRuleFactory {
                 mtmv.readMvLock();
                 try {
                     for (BaseTableInfo baseTableInfo : mtmv.getRelation().getBaseTables()) {
+                        if (!baseTableInfo.isValid()) {
+                            continue;
+                        }
                         LOG.info("mtmv {} related base table include {}", new BaseTableInfo(mtmv), baseTableInfo);
                         try {
                             cascadesContext.getStatementContext().getAndCacheTable(baseTableInfo.toList(),
