@@ -292,11 +292,11 @@ public class AggregateStrategies implements ImplementationRuleFactory {
                     .when(agg -> agg.getDistinctArguments().isEmpty())
                     .thenApplyMulti(ctx -> twoPhaseAggregateWithoutDistinct(ctx.root, ctx.connectContext))
             ),
-            // RuleType.TWO_PHASE_AGGREGATE_WITH_COUNT_DISTINCT_MULTI.build(
-            //     basePattern
-            //         .when(this::containsCountDistinctMultiExpr)
-            //         .thenApplyMulti(ctx -> twoPhaseAggregateWithCountDistinctMulti(ctx.root, ctx.cascadesContext))
-            // ),
+            RuleType.TWO_PHASE_AGGREGATE_WITH_COUNT_DISTINCT_MULTI.build(
+                basePattern
+                    .when(this::containsCountDistinctMultiExpr)
+                    .thenApplyMulti(ctx -> twoPhaseAggregateWithCountDistinctMulti(ctx.root, ctx.cascadesContext))
+            ),
             RuleType.THREE_PHASE_AGGREGATE_WITH_COUNT_DISTINCT_MULTI.build(
                 basePattern
                     .when(this::containsCountDistinctMultiExpr)
@@ -319,11 +319,11 @@ public class AggregateStrategies implements ImplementationRuleFactory {
                             && couldConvertToMulti(agg))
                     .thenApplyMulti(ctx -> twoPhaseAggregateWithMultiDistinct(ctx.root, ctx.connectContext))
             ),
-            // RuleType.TWO_PHASE_AGGREGATE_WITH_DISTINCT.build(
-            //     basePattern
-            //         .when(agg -> agg.getDistinctArguments().size() == 1)
-            //         .thenApplyMulti(ctx -> twoPhaseAggregateWithDistinct(ctx.root, ctx.connectContext))
-            // ),
+            RuleType.TWO_PHASE_AGGREGATE_WITH_DISTINCT.build(
+                basePattern
+                    .when(agg -> agg.getDistinctArguments().size() == 1)
+                    .thenApplyMulti(ctx -> twoPhaseAggregateWithDistinct(ctx.root, ctx.connectContext))
+            ),
             RuleType.THREE_PHASE_AGGREGATE_WITH_DISTINCT.build(
                 basePattern
                     .when(agg -> agg.getDistinctArguments().size() == 1)
