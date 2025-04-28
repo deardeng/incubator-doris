@@ -40,6 +40,7 @@ import org.apache.doris.nereids.trees.plans.Plan;
 import org.apache.doris.nereids.trees.plans.PlanType;
 import org.apache.doris.nereids.trees.plans.commands.Command;
 import org.apache.doris.nereids.trees.plans.commands.ForwardWithSync;
+import org.apache.doris.nereids.trees.plans.logical.LogicalInlineTable;
 import org.apache.doris.nereids.trees.plans.logical.LogicalPlan;
 import org.apache.doris.nereids.trees.plans.physical.PhysicalEmptyRelation;
 import org.apache.doris.nereids.trees.plans.physical.PhysicalHiveTableSink;
@@ -310,6 +311,12 @@ public class InsertIntoTableCommand extends Command implements ForwardWithSync, 
     }
 
     private void runInternal(ConnectContext ctx, StmtExecutor executor) throws Exception {
+        // initPlan will modify logicalQuery, so we need to judge before initPlan
+        if (originalLogicalQuery.containsType(LogicalInlineTable.class)) {
+            if (ctx.getSessionVariable() != null) {
+                ctx.getSessionVariable().checkOverflowForNumberCastOnce();
+            }
+        }
         AbstractInsertExecutor insertExecutor = initPlan(ctx, executor);
         // if the insert stmt data source is empty, directly return, no need to be executed.
         if (insertExecutor.isEmptyInsert()) {

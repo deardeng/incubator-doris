@@ -266,6 +266,7 @@ public class SessionVariable implements Serializable, Writable {
     public static final String ENABLE_LOCAL_SHUFFLE = "enable_local_shuffle";
 
     public static final String FORCE_TO_LOCAL_SHUFFLE = "force_to_local_shuffle";
+    public static final String CHECK_OVERFLOW_FOR_NUMBER_CAST = "check_overflow_for_number_cast";
 
     public static final String ENABLE_AGG_STATE = "enable_agg_state";
 
@@ -1105,6 +1106,9 @@ public class SessionVariable implements Serializable, Writable {
                 description = {"是否在pipelineX引擎上强制开启local shuffle优化",
                         "Whether to force to local shuffle on pipelineX engine."})
     private boolean forceToLocalShuffle = false;
+
+    @VariableMgr.VarAttr(name = CHECK_OVERFLOW_FOR_NUMBER_CAST)
+    private boolean checkOverflowForNumberCast = false;
 
     @VariableMgr.VarAttr(name = ENABLE_AGG_STATE, fuzzy = false, varType = VariableAnnotation.EXPERIMENTAL,
             needForward = true)
@@ -3679,6 +3683,7 @@ public class SessionVariable implements Serializable, Writable {
         tResult.setQueryTimeout(queryTimeoutS);
         tResult.setEnableProfile(enableProfile);
         tResult.setEnableVerboseProfile(enableVerboseProfile);
+        tResult.setCheckOverflowForNumberCast(checkOverflowForNumberCast);
         tResult.setRpcVerboseProfileMaxInstanceCount(rpcVerboseProfileMaxInstanceCount);
         if (enableProfile) {
             // If enable profile == true, then also set report success to true
@@ -4098,6 +4103,14 @@ public class SessionVariable implements Serializable, Writable {
             LOG.warn("set onece {} = {} failed", varName, value);
             return false;
         }
+    }
+
+    public void checkOverflowForNumberCastOnce() throws DdlException {
+        if (checkOverflowForNumberCast) {
+            return;
+        }
+        setIsSingleSetVar(true);
+        VariableMgr.setVar(this, new SetVar(SessionVariable.CHECK_OVERFLOW_FOR_NUMBER_CAST, new StringLiteral("true")));
     }
 
     public void disableStrictConsistencyDmlOnce() throws DdlException {
