@@ -21,6 +21,8 @@ import org.apache.doris.catalog.Env;
 import org.apache.doris.common.NereidsException;
 import org.apache.doris.common.Reference;
 import org.apache.doris.qe.SimpleScheduler;
+import org.apache.doris.resource.computegroup.ComputeGroup;
+import org.apache.doris.resource.computegroup.ComputeGroupMgr;
 import org.apache.doris.system.Backend;
 
 import com.google.common.base.Suppliers;
