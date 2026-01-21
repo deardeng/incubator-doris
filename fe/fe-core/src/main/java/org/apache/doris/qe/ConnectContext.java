@@ -1285,6 +1285,8 @@ public class ConnectContext {
     }
 
     public void setCloudCluster(String cluster) {
+        this.getSessionVariable().setCloudCluster(cluster);
+        // Compatible with cloud clusters does not store logic in session variables.
         this.cloudCluster = cluster;
     }
 
@@ -1375,11 +1377,11 @@ public class ConnectContext {
     }
 
     /**
-     * Tries to choose an available cluster in the following order
-     * 1. Do nothing if a cluster has been chosen for current session. It may be
-     *    chosen explicitly by `use @` command or setCloudCluster() or this method
-     * 2. Tries to choose a default cluster if current mysql user has been set any
-     * 3. Tries to choose an authorized cluster if all preceeding conditions failed
+     * Tries to choose an available cluster in the following order:
+     * 1. Get cluster from session variable (set by `use @` command or setCloudCluster())
+     * 2. Get cluster from cached variable (this.cloudCluster) if available (from previous policy selection)
+     * 3. Get cluster from user's default cluster property if set
+     * 4. Choose an authorized cluster by policy if all preceding conditions failed
      *
      * @param updateErr whether set the connect state to error if the returned cluster is null or empty
      * @return non-empty cluster name if a cluster has been chosen otherwise null or empty string
@@ -1390,7 +1392,6 @@ public class ConnectContext {
             throw new ComputeGroupException("not cloud mode", ComputeGroupException.FailedTypeEnum.NOT_CLOUD_MODE);
         }
 
-        String cluster = null;
         String choseWay = null;
         if (!Strings.isNullOrEmpty(this.cloudCluster)) {
             cluster = this.cloudCluster;
@@ -1400,20 +1401,53 @@ public class ConnectContext {
             return cluster;
         }
 
-        String defaultCluster = getDefaultCloudCluster();
-        if (!Strings.isNullOrEmpty(defaultCluster)) {
-            cluster = defaultCluster;
-            choseWay = "default compute group";
-        } else {
-            CloudClusterResult cloudClusterTypeAndName = getCloudClusterByPolicy();
-            if (cloudClusterTypeAndName != null && !Strings.isNullOrEmpty(cloudClusterTypeAndName.clusterName)) {
-                cluster = cloudClusterTypeAndName.clusterName;
-                choseWay = "authorized cluster";
+        // 1 get cluster from session
+        String sessionCluster = getSessionVariable().getCloudCluster();
+        if (!Strings.isNullOrEmpty(sessionCluster)) {
+            choseWay = "use session";
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("finally set context compute group name {} for user {} with chose way '{}'",
+                        sessionCluster, getCurrentUserIdentity(), choseWay);
             }
+            return sessionCluster;
         }
 
-        if (Strings.isNullOrEmpty(cluster)) {
-            LOG.warn("cant get a valid compute group for user {} to use", getCurrentUserIdentity());
+        // 2 get cluster from a cached variable in connect context
+        // this value comes from a cluster selection policy
+        if (!Strings.isNullOrEmpty(this.cloudCluster)) {
+            choseWay = "user selection policy";
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("finally set context compute group name {} for user {} with chose way '{}'",
+                        cloudCluster, getCurrentUserIdentity(), choseWay);
+            }
+            return cloudCluster;
+        }
+
+        // 3 get cluster from user
+        String userPropCluster = getDefaultCloudClusterFromUser(true);
+        if (!StringUtils.isEmpty(userPropCluster)) {
+            choseWay = "user property";
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("finally set context compute group name {} for user {} with chose way '{}'", userPropCluster,
+                        getCurrentUserIdentity(), choseWay);
+            }
+            this.cloudCluster = userPropCluster;
+            return userPropCluster;
+        }
+
+        String policyCluster = "";
+        CloudClusterResult cloudClusterTypeAndName = getCloudClusterByPolicy();
+        if (cloudClusterTypeAndName != null && !Strings.isNullOrEmpty(cloudClusterTypeAndName.clusterName)) {
+            policyCluster = cloudClusterTypeAndName.clusterName;
+            choseWay = "by policy";
+        }
+
+        if (Strings.isNullOrEmpty(policyCluster)) {
+            List<String> cloudClusterNames
+                    = ((CloudSystemInfoService) Env.getCurrentSystemInfo()).getCloudClusterNames();
+            LOG.warn("Can not get a valid compute group for user {} {} to use, all cluster: {}",
+                    getCurrentUserIdentity(),
+                    getQualifiedUser(), cloudClusterNames);
             ComputeGroupException exception = new ComputeGroupException(
                     "the user is not granted permission to the compute group",
                     ComputeGroupException.FailedTypeEnum.CURRENT_USER_NO_AUTH_TO_USE_ANY_COMPUTE_GROUP);
@@ -1421,13 +1455,15 @@ public class ConnectContext {
                 getState().setError(ErrorCode.ERR_CLOUD_CLUSTER_ERROR, exception.getMessage());
             }
             throw exception;
-        } else {
-            this.cloudCluster = cluster;
-            LOG.info("finally set context compute group name {} for user {} with chose way '{}'",
-                    cloudCluster, getCurrentUserIdentity(), choseWay);
+        }
+        this.cloudCluster = policyCluster;
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("finally set context compute group name {} for user {} with chose way '{}'", this.cloudCluster,
+                    getCurrentUserIdentity(), choseWay);
         }
 
-        return cluster;
+        return this.cloudCluster;
     }
 
     // TODO implement this function
