@@ -134,7 +134,6 @@ suite('test_no_cluster_hits', 'multi_cluster, docker') {
             assertTrue(e.getMessage().contains("ComputeGroupException: CURRENT_USER_NO_AUTH_TO_USE_COMPUTE_GROUP"))
             assertTrue(e.getMessage().contains("set default compute group failed"))
         } 
-        sql """SET PROPERTY FOR 'root' 'default_cloud_cluster' = ${currentCluster.cluster}"""
 
         // no cluster
         def tag = getCloudBeTagByName(currentCluster.cluster)
@@ -154,37 +153,14 @@ suite('test_no_cluster_hits', 'multi_cluster, docker') {
             result.size() == 0
         }
 
-        cluster.addBackend(1, "testCluster")
-
         try {
-            // test root's default cluster invalid
-            connectInDocker('root', '') {
-                sql """insert into $table values (3, 3)"""
-            }
+            // errCode = 2, detailMessage = The current compute group compute_cluster is not registered in the system
+            sql """
+                select * from $table
+            """
         } catch (Exception e) {
             logger.info("exception: {}", e.getMessage())
-            assertTrue(e.getMessage().contains("Unable to find the compute group: <compute_cluster>"))
+            assertTrue(e.getMessage().contains("The current compute group compute_cluster is not registered in the system"))
         } 
-
-        try {
-            connectInDocker('root', '') {
-                sql """select * from $table"""
-            }
-        } catch (Exception e) {
-            logger.info("exception: {}", e.getMessage())
-            assertTrue(e.getMessage().contains("Unable to find the compute group: <compute_cluster>"))
-        } 
-
-
-        try {
-            // test tvf
-            connectInDocker('root', '') {
-                sql """select * from numbers("number" = "100")"""
-            }
-        } catch (Exception e) {
-            logger.info("exception: {}", e.getMessage())
-            assertTrue(e.getMessage().contains("how this compute group is selected: default compute group from user"))
-        }
-        
     }
 }

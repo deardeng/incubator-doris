@@ -23,7 +23,6 @@ import org.apache.doris.catalog.JdbcResource;
 import org.apache.doris.catalog.JdbcTable;
 import org.apache.doris.catalog.TableIf.TableType;
 import org.apache.doris.common.AnalysisException;
-import org.apache.doris.common.Config;
 import org.apache.doris.common.DdlException;
 import org.apache.doris.common.FeConstants;
 import org.apache.doris.datasource.CatalogProperty;
@@ -41,7 +40,6 @@ import org.apache.doris.datasource.mapping.JdbcIdentifierMapping;
 import org.apache.doris.proto.InternalService;
 import org.apache.doris.proto.InternalService.PJdbcTestConnectionRequest;
 import org.apache.doris.proto.InternalService.PJdbcTestConnectionResult;
-import org.apache.doris.resource.computegroup.ComputeGroupMgr;
 import org.apache.doris.rpc.BackendServiceProxy;
 import org.apache.doris.rpc.RpcException;
 import org.apache.doris.system.Backend;
@@ -413,12 +411,7 @@ public class JdbcExternalCatalog extends ExternalCatalog {
             throw new DdlException(e.getMessage());
         }
         if (aliveBe == null) {
-            String computeGroupHints = "";
-            if (Config.isCloudMode()) {
-                // null: computeGroupNotFoundPromptMsg select cluster for hint msg
-                computeGroupHints = ComputeGroupMgr.computeGroupNotFoundPromptMsg(null);
-            }
-            throw new DdlException("Test BE Connection to JDBC Failed: No Alive backends" + computeGroupHints);
+            throw new DdlException("Test BE Connection to JDBC Failed: No Alive backends");
         }
         TNetworkAddress address = new TNetworkAddress(aliveBe.getHost(), aliveBe.getBrpcPort());
         try {
