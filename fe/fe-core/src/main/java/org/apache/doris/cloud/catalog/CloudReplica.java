@@ -30,6 +30,7 @@ import org.apache.doris.common.Pair;
 import org.apache.doris.common.io.Text;
 import org.apache.doris.common.util.DebugPointUtil;
 import org.apache.doris.qe.ConnectContext;
+import org.apache.doris.resource.computegroup.ComputeGroupMgr;
 import org.apache.doris.system.Backend;
 
 import com.google.common.base.Strings;
@@ -282,8 +283,9 @@ public class CloudReplica extends Replica {
         if (!exist) {
             // can't use this default compute group, plz change another
             LOG.warn("compute group: {} is not existed", cluster);
+            String computeGroupHints = ComputeGroupMgr.computeGroupNotFoundPromptMsg(cluster);
             throw new ComputeGroupException(
-                String.format("The current compute group %s is not registered in the system", cluster),
+                computeGroupHints,
                 ComputeGroupException.FailedTypeEnum.CURRENT_COMPUTE_GROUP_NOT_EXIST);
         }
 

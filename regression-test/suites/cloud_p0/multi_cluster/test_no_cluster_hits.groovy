@@ -134,7 +134,7 @@ suite('test_no_cluster_hits', 'multi_cluster, docker') {
             assertTrue(e.getMessage().contains("ComputeGroupException: CURRENT_USER_NO_AUTH_TO_USE_COMPUTE_GROUP"))
             assertTrue(e.getMessage().contains("set default compute group failed"))
         } 
-        sql """SET PROPERTY FOR 'root' 'default_cloud_cluster' = ${currentCluster.cluster}"""
+        sql """SET PROPERTY FOR 'root' 'default_cloud_cluster' = '${currentCluster.cluster}'"""
 
         // no cluster
         def tag = getCloudBeTagByName(currentCluster.cluster)
@@ -183,7 +183,8 @@ suite('test_no_cluster_hits', 'multi_cluster, docker') {
             }
         } catch (Exception e) {
             logger.info("exception: {}", e.getMessage())
-            assertTrue(e.getMessage().contains("how this compute group is selected: default compute group from user"))
+            // Branch 3.1 ignores this check because PR https://github.com/apache/doris/pull/50783 is missing.
+            // assertTrue(e.getMessage().contains("how this compute group is selected: default compute group from user"))
         }
         
     }

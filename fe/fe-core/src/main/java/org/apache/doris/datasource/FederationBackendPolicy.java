@@ -29,6 +29,7 @@ import org.apache.doris.common.util.ConsistentHash;
 import org.apache.doris.mysql.privilege.UserProperty;
 import org.apache.doris.qe.ConnectContext;
 import org.apache.doris.resource.Tag;
+import org.apache.doris.resource.computegroup.ComputeGroupMgr;
 import org.apache.doris.spi.Split;
 import org.apache.doris.system.Backend;
 import org.apache.doris.system.BeSelectionPolicy;
@@ -187,8 +188,8 @@ public class FederationBackendPolicy {
         backends.addAll(policy.getCandidateBackends(Env.getCurrentSystemInfo()
                 .getBackendsByCurrentCluster().values().asList()));
         if (backends.isEmpty()) {
-            throw new UserException("No available backends, "
-                + "in cloud maybe this cluster has been dropped, please `use @otherClusterName` switch it");
+            String computeGroupHints = ComputeGroupMgr.computeGroupNotFoundPromptMsg(null);
+            throw new UserException(computeGroupHints);
         }
         for (Backend backend : backends) {
             assignedWeightPerBackend.put(backend, 0L);
