@@ -1432,14 +1432,9 @@ public class ConnectContext {
 
     // TODO implement this function
     public String getDefaultCloudCluster() {
-        List<String> cloudClusterNames = ((CloudSystemInfoService) Env.getCurrentSystemInfo()).getCloudClusterNames();
         String defaultCluster = Env.getCurrentEnv().getAuth().getDefaultCloudCluster(getQualifiedUser());
         if (Strings.isNullOrEmpty(defaultCluster)) {
             return null;
-        }
-        if (!checkExist) {
-            // default cluster may be dropped.
-            return defaultCluster;
         }
 
         // Validate cluster existence
@@ -1465,7 +1460,7 @@ public class ConnectContext {
 
         }
         String fromSession = ConnectContext.get().getSessionVariable().getCloudCluster();
-        String fromDefaultComputeGroup = ConnectContext.get().getDefaultCloudClusterFromUser(false);
+        String fromDefaultComputeGroup = ConnectContext.get().getDefaultCloudCluster();
         String clusterFrom = "context policy";
         if (clusterName.equalsIgnoreCase(fromSession)) {
             clusterFrom = "session variable";
