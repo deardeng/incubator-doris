@@ -570,10 +570,13 @@ public class ConnectContextTest {
             Assert.assertEquals("policy_cluster2", ctx.cloudCluster);
 
             // Test 5: Priority order - session variable takes precedence over this.cloudCluster
+            /* 
+            // Branch 3.1 ignores this check because PR https://github.com/apache/doris/pull/50783 is missing.
             ctx.setCloudCluster("session_cluster2");
             ctx.cloudCluster = "cached_cluster2"; // This should be ignored
             cluster = ctx.getCloudCluster(false);
             Assert.assertEquals("session_cluster2", cluster); // Session variable wins
+            */
 
             // Test 6: Priority order - user this.cloudCluster over default takes precedence
             ctx.setCloudCluster(null); // Clear session cluster

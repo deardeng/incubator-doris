@@ -43,14 +43,14 @@ suite("default_cluster") {
     println("the be unique id is " + beUniqueIdList);
 
     for (unique_id : beUniqueIdList) {
-        resp = get_cluster.call(unique_id);
+        def resp = get_cluster.call(unique_id);
         for (cluster : resp) {
             if (cluster.type == "COMPUTE") {
                 drop_cluster.call(cluster.cluster_name, cluster.cluster_id);
             }
         }
     }
-    wait_cluster_change()
+    sleep(20000)
 
     List<List<Object>> result  = sql "show clusters"
     assertTrue(result.size() == 0);
@@ -59,7 +59,7 @@ suite("default_cluster") {
                      "regression_cluster_name2", "regression_cluster_id2");
     add_cluster.call(beUniqueIdList[1], ipList[1], hbPortList[1],
                      "regression_cluster_name3", "regression_cluster_id3");
-    wait_cluster_change()
+    sleep(20000)
 
     result  = sql "show clusters"
     assertTrue(result.size() == 2);

@@ -1394,10 +1394,10 @@ public class ConnectContext {
 
         String choseWay = null;
         if (!Strings.isNullOrEmpty(this.cloudCluster)) {
-            cluster = this.cloudCluster;
+            String cluster = this.cloudCluster;
             choseWay = "use context cluster";
             LOG.debug("finally set context compute group name {} for user {} with chose way '{}'",
-                    cloudCluster, getCurrentUserIdentity(), choseWay);
+                    cluster, getCurrentUserIdentity(), choseWay);
             return cluster;
         }
 
@@ -1424,7 +1424,7 @@ public class ConnectContext {
         }
 
         // 3 get cluster from user
-        String userPropCluster = getDefaultCloudClusterFromUser(true);
+        String userPropCluster = getDefaultCloudCluster();
         if (!StringUtils.isEmpty(userPropCluster)) {
             choseWay = "user property";
             if (LOG.isDebugEnabled()) {
